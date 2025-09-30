@@ -13,9 +13,6 @@
     }
   ],
   "env": {
-    "ALPHAVANTAGE_API_KEY": "@alphavantage_api_key",
-    "EIA_API_KEY": "@eia_api_key",
-    "SENTIENT_API_KEY": "@sentient_api_key",
-    "SECRET_KEY": "@secret_key"
+    "SENTIENT_API_KEY": "key_4pVTEkqgJWn3ZMVz"
   }
 }
