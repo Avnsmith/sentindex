@@ -17,10 +17,5 @@
     "EIA_API_KEY": "@eia_api_key",
     "SENTIENT_API_KEY": "@sentient_api_key",
     "SECRET_KEY": "@secret_key"
-  },
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 30
-    }
   }
 }
