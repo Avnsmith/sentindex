@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
+  ],
+  "env": {
+    "ALPHAVANTAGE_API_KEY": "@alphavantage_api_key",
+    "EIA_API_KEY": "@eia_api_key",
+    "SENTIENT_API_KEY": "@sentient_api_key",
+    "SECRET_KEY": "@secret_key"
+  },
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30
+    }
+  }
+}

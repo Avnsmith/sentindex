@@ -1,0 +1,83 @@
+# Sentindex Configuration
+
+# Database settings
+database:
+  host: "localhost"
+  port: 5432
+  name: "sentindex"
+  user: "sentindex"
+  password: "sentindex_password"
+  pool_size: 10
+  max_overflow: 20
+
+# Redis settings
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: null
+
+# Kafka settings
+kafka:
+  bootstrap_servers: ["localhost:9092"]
+  topic_prefix: "sentindex"
+  consumer_group: "sentindex-consumer"
+
+# Index configuration
+indices:
+  gold_silver_oil_crypto:
+    name: "Gold-Silver-Oil-Crypto Index"
+    base_level: 1000.0
+    base_date: "2025-01-01"
+    weights:
+      GOLD: 0.25
+      SILVER: 0.25
+      OIL: 0.20
+      BTC: 0.15
+      ETH: 0.15
+    base_prices:
+      GOLD: 1800.0    # USD/oz
+      SILVER: 23.0    # USD/oz
+      OIL: 75.0       # USD/bbl
+      BTC: 20000.0    # USD
+      ETH: 1000.0     # USD
+
+# Data sources
+data_sources:
+  alphavantage:
+    api_key: "${ALPHAVANTAGE_API_KEY}"
+    base_url: "https://www.alphavantage.co/query"
+    rate_limit: 5  # requests per minute
+    
+  yahoo:
+    base_url: "https://query1.finance.yahoo.com/v8/finance/chart"
+    rate_limit: 60  # requests per minute
+    
+  coingecko:
+    base_url: "https://api.coingecko.com/api/v3"
+    rate_limit: 30  # requests per minute
+    
+  eia:
+    api_key: "${EIA_API_KEY}"
+    base_url: "https://api.eia.gov/v2"
+    rate_limit: 10  # requests per minute
+
+# Sentient LLM settings
+sentient:
+  api_key: "${SENTIENT_API_KEY}"
+  base_url: "https://api.sentient.ai"
+  model: "dobby"
+  max_tokens: 1000
+  temperature: 0.1
+
+# Monitoring
+monitoring:
+  prometheus_port: 8001
+  log_level: "INFO"
+  metrics_enabled: true
+
+# Security
+security:
+  secret_key: "${SECRET_KEY}"
+  algorithm: "HS256"
+  access_token_expire_minutes: 30
