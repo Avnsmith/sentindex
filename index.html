@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentindex - Financial Index Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .result pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status.healthy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+
+        .price-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .price-input {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-input label {
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .price-input input {
+            padding: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Sentindex</h1>
+            <p>Financial Index Platform with AI-Powered Insights</p>
+        </div>
+
+        <div class="dashboard">
+            <!-- Health Check Card -->
+            <div class="card">
+                <h2>🏥 System Health</h2>
+                <button class="btn" onclick="checkHealth()">Check API Health</button>
+                <div class="loading" id="healthLoading">
+                    <div class="spinner"></div>
+                    Checking health...
+                </div>
+                <div id="healthResult"></div>
+            </div>
+
+            <!-- Index Calculator Card -->
+            <div class="card">
+                <h2>📊 Index Calculator</h2>
+                <div class="form-group">
+                    <label for="indexName">Index Name</label>
+                    <input type="text" id="indexName" value="gold_silver_oil_crypto" placeholder="Enter index name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Asset Prices (USD)</label>
+                    <div class="price-inputs">
+                        <div class="price-input">
+                            <label>Gold (per oz)</label>
+                            <input type="number" id="goldPrice" value="1900.12" step="0.01">
+                        </div>
+                        <div class="price-input">
+                            <label>Silver (per oz)</label>
+                            <input type="number" id="silverPrice" value="24.31" step="0.01">
+                        </div>
+                        <div class="price-input">
+                            <label>Oil (per barrel)</label>
+                            <input type="number" id="oilPrice" value="78.45" step="0.01">
+                        </div>
+                        <div class="price-input">
+                            <label>Bitcoin</label>
+                            <input type="number" id="btcPrice" value="27450" step="0.01">
+                        </div>
+                        <div class="price-input">
+                            <label>Ethereum</label>
+                            <input type="number" id="ethPrice" value="1850" step="0.01">
+                        </div>
+                        <div class="price-input">
+                            <label>Method</label>
+                            <select id="method">
+                                <option value="level_normalized">Level Normalized</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="calculateIndex()">Calculate Index</button>
+                <div class="loading" id="calcLoading">
+                    <div class="spinner"></div>
+                    Calculating index...
+                </div>
+                <div id="calcResult"></div>
+            </div>
+
+            <!-- AI Insights Card -->
+            <div class="card">
+                <h2>🤖 AI Insights</h2>
+                <div class="form-group">
+                    <label for="insightsIndexName">Index Name</label>
+                    <input type="text" id="insightsIndexName" value="gold_silver_oil_crypto" placeholder="Enter index name">
+                </div>
+                <button class="btn" onclick="getInsights()">Get AI Insights</button>
+                <div class="loading" id="insightsLoading">
+                    <div class="spinner"></div>
+                    Generating insights...
+                </div>
+                <div id="insightsResult"></div>
+            </div>
+
+            <!-- Latest Index Card -->
+            <div class="card">
+                <h2>📈 Latest Index</h2>
+                <div class="form-group">
+                    <label for="latestIndexName">Index Name</label>
+                    <input type="text" id="latestIndexName" value="gold_silver_oil_crypto" placeholder="Enter index name">
+                </div>
+                <button class="btn" onclick="getLatestIndex()">Get Latest Index</button>
+                <div class="loading" id="latestLoading">
+                    <div class="spinner"></div>
+                    Fetching latest index...
+                </div>
+                <div id="latestResult"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Powered by Sentient Dobby LLM • Built with FastAPI & Vercel</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function makeRequest(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || `HTTP ${response.status}`);
+                }
+                
+                return result;
+            } catch (error) {
+                throw new Error(`Request failed: ${error.message}`);
+            }
+        }
+
+        function showLoading(elementId) {
+            document.getElementById(elementId).style.display = 'block';
+        }
+
+        function hideLoading(elementId) {
+            document.getElementById(elementId).style.display = 'none';
+        }
+
+        function showResult(elementId, content, isError = false) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.innerHTML = `
+                <div class="result">
+                    <h3>${isError ? '❌ Error' : '✅ Result'}</h3>
+                    <pre>${JSON.stringify(content, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        async function checkHealth() {
+            showLoading('healthLoading');
+            try {
+                const result = await makeRequest('/health');
+                hideLoading('healthLoading');
+                showResult('healthResult', result);
+            } catch (error) {
+                hideLoading('healthLoading');
+                showResult('healthResult', { error: error.message }, true);
+            }
+        }
+
+        async function calculateIndex() {
+            showLoading('calcLoading');
+            try {
+                const indexName = document.getElementById('indexName').value;
+                const prices = {
+                    GOLD: parseFloat(document.getElementById('goldPrice').value),
+                    SILVER: parseFloat(document.getElementById('silverPrice').value),
+                    OIL: parseFloat(document.getElementById('oilPrice').value),
+                    BTC: parseFloat(document.getElementById('btcPrice').value),
+                    ETH: parseFloat(document.getElementById('ethPrice').value)
+                };
+                const method = document.getElementById('method').value;
+
+                const result = await makeRequest(`/v1/index/${indexName}/compute`, 'POST', {
+                    index_name: indexName,
+                    prices: prices,
+                    method: method
+                });
+                
+                hideLoading('calcLoading');
+                showResult('calcResult', result);
+            } catch (error) {
+                hideLoading('calcLoading');
+                showResult('calcResult', { error: error.message }, true);
+            }
+        }
+
+        async function getInsights() {
+            showLoading('insightsLoading');
+            try {
+                const indexName = document.getElementById('insightsIndexName').value;
+                const result = await makeRequest(`/v1/index/${indexName}/insights`);
+                hideLoading('insightsLoading');
+                showResult('insightsResult', result);
+            } catch (error) {
+                hideLoading('insightsLoading');
+                showResult('insightsResult', { error: error.message }, true);
+            }
+        }
+
+        async function getLatestIndex() {
+            showLoading('latestLoading');
+            try {
+                const indexName = document.getElementById('latestIndexName').value;
+                const result = await makeRequest(`/v1/index/${indexName}/latest`);
+                hideLoading('latestLoading');
+                showResult('latestResult', result);
+            } catch (error) {
+                hideLoading('latestLoading');
+                showResult('latestResult', { error: error.message }, true);
+            }
+        }
+
+        // Auto-check health on page load
+        window.addEventListener('load', () => {
+            setTimeout(checkHealth, 1000);
+        });
+    </script>
+</body>
+</html>
