@@ -1,3 +1,1 @@
-# Ultra-minimal dependencies for Vercel deployment
-fastapi==0.104.1
-pydantic==2.5.0
+# No external dependencies - using built-in Python modules only
