@@ -14,10 +14,5 @@
   ],
   "env": {
     "SENTIENT_API_KEY": "key_4pVTEkqgJWn3ZMVz"
-  },
-  "functions": {
-    "api/simple.py": {
-      "maxDuration": 10
-    }
   }
 }
