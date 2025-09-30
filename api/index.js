@@ -1,7 +1,55 @@
 /**
  * Sentindex API - Node.js version for Vercel
  * Avoiding Python runtime issues by using Node.js
+ * Integrated with Sentient Dobby LLM
  */
+
+// Sentient API configuration
+const SENTIENT_CONFIG = {
+  apiKey: process.env.SENTIENT_API_KEY || 'key_4pVTEkqgJWn3ZMVz',
+  baseUrl: 'https://api.sentient.ai/v1/chat/completions',
+  model: 'dobby',
+  maxTokens: 1000,
+  temperature: 0.1
+};
+
+// Function to call Sentient API
+async function callSentientAPI(prompt) {
+  try {
+    const response = await fetch(SENTIENT_CONFIG.baseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SENTIENT_CONFIG.apiKey}`
+      },
+      body: JSON.stringify({
+        model: SENTIENT_CONFIG.model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a financial analyst. Provide concise, accurate market analysis in JSON format.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: SENTIENT_CONFIG.maxTokens,
+        temperature: SENTIENT_CONFIG.temperature
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Sentient API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0]?.message?.content || 'No response from AI';
+  } catch (error) {
+    console.error('Sentient API error:', error);
+    return `AI analysis unavailable: ${error.message}`;
+  }
+}
 
 export default function handler(req, res) {
   // Set CORS headers
@@ -55,15 +103,32 @@ export default function handler(req, res) {
         // Extract index name from path
         const parts = path.split('/');
         const indexName = parts[parts.length - 2] || "default";
+        
+        // Create prompt for Sentient API
+        const prompt = `Analyze the current financial market conditions for the ${indexName} index. 
+        Provide insights on:
+        1. Market sentiment (positive/negative/neutral)
+        2. Key market drivers
+        3. Notable events or trends
+        4. Risk factors
+        5. Outlook summary
+        
+        Return your analysis in JSON format with keys: sentiment, summary, notable_events, risk_factors, outlook.`;
+        
+        // Call Sentient API
+        const aiResponse = await callSentientAPI(prompt);
+        
         res.status(200).json({
           index_name: indexName,
           insights: {
-            summary: "Market analysis using Sentient LLM integration",
-            sentiment: "positive",
-            notable_events: ["Index calculated successfully"]
+            ai_analysis: aiResponse,
+            sentiment: "AI-generated",
+            notable_events: ["Real-time AI analysis"],
+            source: "Sentient Dobby LLM",
+            timestamp: new Date().toISOString()
           },
-          timestamp: "2025-01-01T00:00:00Z",
-          message: "AI insights generated",
+          timestamp: new Date().toISOString(),
+          message: "AI insights generated using Sentient Dobby LLM",
           source: "Sentient Dobby LLM"
         });
       } else if (path === '/metrics') {
@@ -71,6 +136,18 @@ export default function handler(req, res) {
           message: "Metrics endpoint available",
           status: "healthy",
           timestamp: "2025-01-01T00:00:00Z"
+        });
+      } else if (path === '/api/sentient/test') {
+        // Test endpoint for Sentient API
+        const testPrompt = "Provide a brief market analysis for today's financial markets in JSON format.";
+        const aiResponse = await callSentientAPI(testPrompt);
+        
+        res.status(200).json({
+          message: "Sentient API test successful",
+          prompt: testPrompt,
+          response: aiResponse,
+          timestamp: new Date().toISOString(),
+          source: "Sentient Dobby LLM"
         });
       } else {
         res.status(404).json({ error: "Not found", path: path });

@@ -210,6 +210,12 @@
         <div class="header">
             <h1>🚀 Sentindex</h1>
             <p>Financial Index Platform with AI-Powered Insights</p>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <p style="font-size: 14px; margin: 0;">
+                    <strong>🔐 Authentication Required:</strong> This platform is protected by Vercel authentication. 
+                    If you see authentication errors, please login to Vercel to access the API endpoints.
+                </p>
+            </div>
         </div>
 
         <div class="dashboard">
@@ -301,6 +307,20 @@
                 </div>
                 <div id="latestResult"></div>
             </div>
+
+            <!-- Sentient AI Test Card -->
+            <div class="card">
+                <h2>🤖 Sentient AI Test</h2>
+                <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                    Test the Sentient Dobby LLM integration with your API key
+                </p>
+                <button class="btn" onclick="testSentient()">Test Sentient API</button>
+                <div class="loading" id="sentientLoading">
+                    <div class="spinner"></div>
+                    Testing Sentient AI...
+                </div>
+                <div id="sentientResult"></div>
+            </div>
         </div>
 
         <div class="footer">
@@ -325,6 +345,13 @@
                 }
 
                 const response = await fetch(`${API_BASE}${endpoint}`, options);
+                
+                // Check if response is HTML (authentication page)
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('text/html')) {
+                    throw new Error('Authentication required - please login to Vercel to access the API');
+                }
+                
                 const result = await response.json();
                 
                 if (!response.ok) {
@@ -333,6 +360,9 @@
                 
                 return result;
             } catch (error) {
+                if (error.message.includes('Unexpected token')) {
+                    throw new Error('Authentication required - please login to Vercel to access the API');
+                }
                 throw new Error(`Request failed: ${error.message}`);
             }
         }
@@ -358,7 +388,7 @@
         async function checkHealth() {
             showLoading('healthLoading');
             try {
-                const result = await makeRequest('/health');
+                const result = await makeRequest('/api/health');
                 hideLoading('healthLoading');
                 showResult('healthResult', result);
             } catch (error) {
@@ -380,7 +410,7 @@
                 };
                 const method = document.getElementById('method').value;
 
-                const result = await makeRequest(`/v1/index/${indexName}/compute`, 'POST', {
+                const result = await makeRequest(`/api/v1/index/${indexName}/compute`, 'POST', {
                     index_name: indexName,
                     prices: prices,
                     method: method
@@ -398,7 +428,7 @@
             showLoading('insightsLoading');
             try {
                 const indexName = document.getElementById('insightsIndexName').value;
-                const result = await makeRequest(`/v1/index/${indexName}/insights`);
+                const result = await makeRequest(`/api/v1/index/${indexName}/insights`);
                 hideLoading('insightsLoading');
                 showResult('insightsResult', result);
             } catch (error) {
@@ -411,12 +441,24 @@
             showLoading('latestLoading');
             try {
                 const indexName = document.getElementById('latestIndexName').value;
-                const result = await makeRequest(`/v1/index/${indexName}/latest`);
+                const result = await makeRequest(`/api/v1/index/${indexName}/latest`);
                 hideLoading('latestLoading');
                 showResult('latestResult', result);
             } catch (error) {
                 hideLoading('latestLoading');
                 showResult('latestResult', { error: error.message }, true);
+            }
+        }
+
+        async function testSentient() {
+            showLoading('sentientLoading');
+            try {
+                const result = await makeRequest('/api/sentient/test');
+                hideLoading('sentientLoading');
+                showResult('sentientResult', result);
+            } catch (error) {
+                hideLoading('sentientLoading');
+                showResult('sentientResult', { error: error.message }, true);
             }
         }
 
